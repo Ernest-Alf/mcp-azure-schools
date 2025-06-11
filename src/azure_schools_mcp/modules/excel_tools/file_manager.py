@@ -248,6 +248,37 @@ class ExcelFileManager:
                 "custom_analysis()"
             ]
         }
+    def get_excel_file_info(self, filename: str) -> str:
+        """Obtiene información de un archivo Excel (retorna JSON string)"""
+        result = self.get_file_info(filename)  # Este puede devolver dict
+        
+        # Si es dict, convertir a JSON string
+        if isinstance(result, dict):
+            import json
+            return json.dumps(result, ensure_ascii=False, indent=2)
+        
+        # Si ya es string, devolverlo tal como está
+        return result
+
+
+    def list_loaded_excel_files(self) -> dict:
+        """Lista archivos Excel cargados en memoria"""
+        loaded_files = []
+        for filename, metadata in self.file_metadata.items():
+            if metadata.get('loaded', False):
+                loaded_files.append({
+                    'filename': filename,
+                    'loaded_at': metadata.get('loaded_at', 'Unknown'),
+                    'size_mb': metadata.get('size_mb', 0),
+                    'rows': metadata.get('rows', 0),
+                    'columns': metadata.get('columns', 0)
+                })
+        
+        return {
+            'total_loaded': len(loaded_files),
+            'loaded_files': loaded_files
+        }
+
 
 # Instancia global del gestor
 excel_file_manager = ExcelFileManager()
