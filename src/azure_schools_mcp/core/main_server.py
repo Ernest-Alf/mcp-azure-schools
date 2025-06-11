@@ -15,8 +15,8 @@ sys.path.insert(0, str(project_root / "src"))
 from mcp.server.fastmcp import FastMCP
 
 # Imports de módulos
-from azure_schools_mcp.tools.excel_extraction import register_excel_tools
-from azure_schools_mcp.tools.diagnostics import register_diagnostics_tools
+from src.azure_schools_mcp.processors.excel_extraction import register_excel_tools
+from src.azure_schools_mcp.tests.diagnostics import register_diagnostics_tools
 from azure_schools_mcp.modules.database_management import register_database_management_tools
 
 # Crear servidor MCP
@@ -51,7 +51,7 @@ def test_server():
     
     # Test básico del nuevo módulo
     try:
-        from azure_schools_mcp.modules.database_management import schema_registry, table_inspector
+        from azure_schools_mcp.database_management import schema_registry, table_inspector
         
         print("✅ Schema Registry: Funcionando")
         print("✅ Table Inspector: Funcionando") 
