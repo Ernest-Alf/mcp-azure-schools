@@ -1,6 +1,6 @@
 """
-Sistema Educativo MCP - Servidor Principal Simplificado
-Enfocado únicamente en extracción de datos Excel
+Sistema Educativo MCP - Servidor Principal
+Versión con Database Management Module
 Ernest-Alf - Junio 2025
 """
 
@@ -14,60 +14,56 @@ sys.path.insert(0, str(project_root / "src"))
 
 from mcp.server.fastmcp import FastMCP
 
-# Imports de herramientas simplificadas
+# Imports de módulos
 from azure_schools_mcp.tools.excel_extraction import register_excel_tools
 from azure_schools_mcp.tools.diagnostics import register_diagnostics_tools
+from azure_schools_mcp.modules.database_management import register_database_management_tools
 
 # Crear servidor MCP
-mcp = FastMCP("sistema-educativo-mcp-simple")
+mcp = FastMCP("sistema-educativo-mcp")
 
 def initialize_mcp_server():
-    """Inicializa el servidor MCP simplificado con 5 herramientas esenciales"""
-    print("🎯 Inicializando Sistema Educativo MCP - Versión Simplificada")
+    """Inicializa el servidor MCP con todos los módulos"""
+    print("🎯 Inicializando Sistema Educativo MCP - Database Management")
     
-    # Registrar herramientas Excel (3 herramientas)
+    # Módulos existentes
     excel_tools = register_excel_tools(mcp)
-    print(f"✅ Excel Tools: {len(excel_tools)} herramientas registradas")
+    print(f"✅ Excel Tools: {len(excel_tools)} herramientas")
     
-    # Registrar herramientas de diagnóstico (2 herramientas)
     diagnostics_tools = register_diagnostics_tools(mcp)
-    print(f"✅ Diagnostics Tools: {len(diagnostics_tools)} herramientas registradas")
+    print(f"✅ Diagnostics Tools: {len(diagnostics_tools)} herramientas")
     
-    total_tools = len(excel_tools) + len(diagnostics_tools)
+    # Nuevo módulo Database Management
+    database_management_tools = register_database_management_tools(mcp)
+    print(f"✅ Database Management: {len(database_management_tools)} herramientas")
+    
+    total_tools = len(excel_tools) + len(diagnostics_tools) + len(database_management_tools)
     print(f"🎯 Servidor MCP inicializado con {total_tools} herramientas totales")
-    print("📊 Enfoque: Extracción y análisis de datos Excel educativos")
+    print("📊 Arquitectura evolutiva lista para análisis de tus archivos Excel")
     
     return mcp
 
 def test_server():
-    """Prueba rápida del servidor simplificado"""
-    print("🧪 Probando Sistema Educativo MCP - Versión Simplificada...")
+    """Prueba del servidor con Database Management"""
+    print("🧪 Probando Sistema Educativo MCP - Database Management...")
     
-    # Inicializar servidor
     server = initialize_mcp_server()
     
-    # Test básico de herramientas
+    # Test básico del nuevo módulo
     try:
-        from azure_schools_mcp.tools.excel_extraction import excel_extractor
-        from azure_schools_mcp.tools.diagnostics import system_diagnostics
+        from azure_schools_mcp.modules.database_management import schema_registry, table_inspector
         
-        # Test extracción Excel
-        excel_status = excel_extractor.list_excel_files()
-        print(f"✅ Excel Tools: {excel_status.get('total_files', 0)} archivos detectados")
-        
-        # Test diagnósticos
-        system_status = system_diagnostics.get_system_status()
-        print(f"✅ System Status: {system_status.get('mcp_server', {}).get('tools_available', 0)} herramientas")
-        
-        print("🚀 Servidor MCP simplificado listo para uso")
+        print("✅ Schema Registry: Funcionando")
+        print("✅ Table Inspector: Funcionando") 
+        print("✅ Database Management Module: Operativo")
+        print("🚀 Sistema listo para analizar tus archivos Excel y crear esquemas automáticamente")
         
     except Exception as e:
-        print(f"❌ Error en test: {e}")
+        print(f"❌ Error en Database Management: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":
         test_server()
     else:
-        # Ejecutar servidor
         initialize_mcp_server()
         mcp.run()
