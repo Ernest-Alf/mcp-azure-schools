@@ -1,34 +1,21 @@
-# =========================================================
-# SISTEMA EDUCATIVO MCP - DEPENDENCIAS
-# Ernest-Alf - Junio 2025
-# Versiones verificadas y funcionando en producción
-# =========================================================
+# Sistema Educativo MCP - Dependencias Esenciales
+# Ernest-Alf - Junio 2025 - Versión Simplificada
 
 # CORE MCP
 mcp==1.9.3
 
-# PROCESAMIENTO DE DATOS
+# PROCESAMIENTO EXCEL
 pandas==2.3.0
-numpy>=2.0.0
 openpyxl==3.1.5
 
 # CONFIGURACIÓN
-pydantic==2.11.5
-pydantic-settings==2.9.1
 python-dotenv==1.1.0
+pydantic==2.11.5
 
-# BASE DE DATOS
+# BASE DE DATOS (OPCIONAL)
 pyodbc==5.2.0
 sqlalchemy>=2.0.41
 
-# WEB SERVER
-uvicorn==0.34.3
-
-# DESARROLLO
-pytest==8.4.0
-black==25.1.0
-
-# =========================================================
-# ESTADO: ✅ 8/8 HERRAMIENTAS MCP FUNCIONANDO
-# Sistema listo para análisis educativo en producción
-# =========================================================
+# STATUS: ✅ Solo dependencias esenciales para extracción Excel
+# HERRAMIENTAS: 5 herramientas MCP simplificadas
+# ENFOQUE: Extracción de datos educativos únicamente

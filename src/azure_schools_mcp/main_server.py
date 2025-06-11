@@ -1,90 +1,73 @@
 """
-Servidor MCP principal del Sistema Educativo - Versión Modular
+Sistema Educativo MCP - Servidor Principal Simplificado
+Enfocado únicamente en extracción de datos Excel
+Ernest-Alf - Junio 2025
 """
 
 import sys
-import os
 from pathlib import Path
 
-# Añadir src al path para imports
+# Configurar path para imports
 current_dir = Path(__file__).parent
 project_root = current_dir.parent.parent
 sys.path.insert(0, str(project_root / "src"))
 
 from mcp.server.fastmcp import FastMCP
 
-# Imports absolutos
-from azure_schools_mcp.config.settings import settings
-from azure_schools_mcp.utils.logger import setup_logger
-from azure_schools_mcp.modules.diagnostics.mcp_tools import register_diagnostics_tools
-from azure_schools_mcp.modules.excel_tools.mcp_tools import register_excel_tools
+# Imports de herramientas simplificadas
+from azure_schools_mcp.tools.excel_extraction import register_excel_tools
+from azure_schools_mcp.tools.diagnostics import register_diagnostics_tools
 
-# Configurar logging
-logger = setup_logger("main_server")
-
-# Crear el servidor MCP
-mcp = FastMCP(settings.mcp.server_name)
+# Crear servidor MCP
+mcp = FastMCP("sistema-educativo-mcp-simple")
 
 def initialize_mcp_server():
-    """Inicializa el servidor MCP con todos los módulos"""
-    logger.info("🚀 Inicializando Sistema Educativo MCP - Versión Modular v2.0")
+    """Inicializa el servidor MCP simplificado con 5 herramientas esenciales"""
+    print("🎯 Inicializando Sistema Educativo MCP - Versión Simplificada")
     
-    # Registrar herramientas del módulo diagnostics
-    diagnostics_tools = register_diagnostics_tools(mcp)
-    logger.info(f"✅ Módulo diagnostics: {len(diagnostics_tools)} herramientas registradas")
-    
-    # Registrar herramientas del módulo excel_tools
+    # Registrar herramientas Excel (3 herramientas)
     excel_tools = register_excel_tools(mcp)
-    logger.info(f"✅ Módulo excel_tools: {len(excel_tools)} herramientas registradas")
+    print(f"✅ Excel Tools: {len(excel_tools)} herramientas registradas")
     
-    # TODO: Registrar otros módulos aquí cuando estén listos
-    # register_schools_analysis_tools(mcp)
-    # register_database_tools(mcp)
-    # register_reporting_tools(mcp)
+    # Registrar herramientas de diagnóstico (2 herramientas)
+    diagnostics_tools = register_diagnostics_tools(mcp)
+    print(f"✅ Diagnostics Tools: {len(diagnostics_tools)} herramientas registradas")
     
-    total_tools = len(diagnostics_tools) + len(excel_tools)
-    logger.info(f"🎯 Servidor MCP inicializado con {total_tools} herramientas totales")
+    total_tools = len(excel_tools) + len(diagnostics_tools)
+    print(f"🎯 Servidor MCP inicializado con {total_tools} herramientas totales")
+    print("📊 Enfoque: Extracción y análisis de datos Excel educativos")
     
     return mcp
 
-# Función de prueba para mantener compatibilidad
 def test_server():
-    """Prueba básica del servidor MCP modular"""
-    print("🧪 Probando Sistema Educativo MCP - Versión Modular v2.0...")
+    """Prueba rápida del servidor simplificado"""
+    print("🧪 Probando Sistema Educativo MCP - Versión Simplificada...")
     
     # Inicializar servidor
     server = initialize_mcp_server()
     
-    # Información del sistema
-    from azure_schools_mcp.modules.diagnostics.system_info import system_info_manager
-    from azure_schools_mcp.modules.excel_tools.file_manager import excel_file_manager
-    
-    print(f"📁 Directorio Excel: {system_info_manager.excel_dir}")
-    print(f"🗄️  Azure SQL: {'✅ Configurado' if settings.is_database_configured() else '❌ No configurado'}")
-    
-    # Probar herramientas de diagnóstico
+    # Test básico de herramientas
     try:
-        report = system_info_manager.generate_diagnostic_report()
-        print("✅ debug_info_v2() funciona")
-        print(f"📄 Resultado: {report[:100]}...")
+        from azure_schools_mcp.tools.excel_extraction import excel_extractor
+        from azure_schools_mcp.tools.diagnostics import system_diagnostics
+        
+        # Test extracción Excel
+        excel_status = excel_extractor.list_excel_files()
+        print(f"✅ Excel Tools: {excel_status.get('total_files', 0)} archivos detectados")
+        
+        # Test diagnósticos
+        system_status = system_diagnostics.get_system_status()
+        print(f"✅ System Status: {system_status.get('mcp_server', {}).get('tools_available', 0)} herramientas")
+        
+        print("🚀 Servidor MCP simplificado listo para uso")
+        
     except Exception as e:
-        print(f"❌ Error en debug_info_v2(): {e}")
-    
-    # Probar herramientas de Excel
-    try:
-        excel_result = excel_file_manager.list_excel_files()
-        print("✅ list_excel_files_v2() funciona")
-        print(f"📊 Archivos Excel: {excel_result.get('total_files', 0)}")
-    except Exception as e:
-        print(f"❌ Error en list_excel_files_v2(): {e}")
-    
-    print("🚀 Servidor MCP modular v2.0 listo para ejecutar")
+        print(f"❌ Error en test: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":
         test_server()
     else:
-        # Inicializar e iniciar servidor
+        # Ejecutar servidor
         initialize_mcp_server()
-        print("🚀 Iniciando Sistema Educativo MCP - Versión Modular v2.0...")
         mcp.run()
