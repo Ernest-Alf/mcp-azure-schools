@@ -7,8 +7,8 @@ import sys
 from pathlib import Path
 from typing import Dict, Any
 import pandas as pd
-from azure_schools_mcp.config.settings import settings
-from azure_schools_mcp.utils.logger import setup_logger
+from ...config.settings import settings
+from ...utils.logger import setup_logger
 
 logger = setup_logger("diagnostics.system_info")
 
@@ -52,7 +52,7 @@ class SystemInfoManager:
         
         # Test de conexión
         try:
-            from azure_schools_mcp.config.database import db_manager
+            from ...config.database import db_manager
             status["connection_test"] = db_manager.test_connection()
         except Exception as e:
             status["connection_test"] = False
@@ -97,28 +97,6 @@ class SystemInfoManager:
             info["total_size_mb"] = round(total_size, 2)
         
         return info
-    
-    def get_configuration_summary(self) -> Dict[str, Any]:
-        """Obtiene resumen de configuración del sistema"""
-        return {
-            "mcp": {
-                "server_name": settings.mcp.server_name,
-                "max_tools": settings.mcp.max_tools,
-                "timeout_seconds": settings.mcp.timeout_seconds
-            },
-            "excel": {
-                "max_file_size_mb": settings.excel.max_file_size_mb,
-                "supported_extensions": settings.excel.supported_extensions,
-                "max_rows_per_query": settings.excel.max_rows_per_query
-            },
-            "system": {
-                "log_level": settings.system.log_level,
-                "max_rows_default": settings.system.max_rows_default,
-                "cache_enabled": settings.system.cache_enabled,
-                "cache_ttl_minutes": settings.system.cache_ttl_minutes,
-                "debug_mode": settings.system.debug_mode
-            }
-        }
     
     def generate_diagnostic_report(self) -> str:
         """Genera el reporte de diagnóstico completo (migrado desde debug_info)"""
@@ -173,14 +151,13 @@ class SystemInfoManager:
             report_lines.append("")
         
         # Configuración del sistema
-        config = self.get_configuration_summary()
         report_lines.extend([
             "⚙️  CONFIGURACIÓN:",
-            f"   🔧 MCP Server: {config['mcp']['server_name']}",
-            f"   📊 Max filas default: {config['system']['max_rows_default']}",
-            f"   📝 Log level: {config['system']['log_level']}",
-            f"   💾 Cache enabled: {config['system']['cache_enabled']}",
-            f"   🐛 Debug mode: {config['system']['debug_mode']}",
+            f"   🔧 MCP Server: {settings.mcp.server_name}",
+            f"   📊 Max filas default: {settings.system.max_rows_default}",
+            f"   📝 Log level: {settings.system.log_level}",
+            f"   💾 Cache enabled: {settings.system.cache_enabled}",
+            f"   🐛 Debug mode: {settings.system.debug_mode}",
             ""
         ])
         
@@ -190,6 +167,50 @@ class SystemInfoManager:
         ])
         
         return "\n".join(report_lines)
+
+# Instancia global del gestor
+system_info_manager = SystemInfoManager()
+
+    def get_configuration_summary(self) -> Dict[str, Any]:
+        """Obtiene resumen de configuración del sistema"""
+        return {
+            "mcp": {
+                "server_name": settings.mcp.server_name,
+                "max_tools": settings.mcp.max_tools,
+                "timeout_seconds": settings.mcp.timeout_seconds
+            },
+            "excel": {
+                "max_file_size_mb": settings.excel.max_file_size_mb,
+                "supported_extensions": settings.excel.supported_extensions,
+                "max_rows_per_query": settings.excel.max_rows_per_query
+            },
+            "system": {
+                "log_level": settings.system.log_level,
+                "max_rows_default": settings.system.max_rows_default,
+                "cache_enabled": settings.system.cache_enabled,
+                "cache_ttl_minutes": settings.system.cache_ttl_minutes,
+                "debug_mode": settings.system.debug_mode
+    def get_configuration_summary(self) -> Dict[str, Any]:
+        """Obtiene resumen de configuración del sistema"""
+        return {
+            "mcp": {
+                "server_name": settings.mcp.server_name,
+                "max_tools": settings.mcp.max_tools,
+                "timeout_seconds": settings.mcp.timeout_seconds
+            },
+            "excel": {
+                "max_file_size_mb": settings.excel.max_file_size_mb,
+                "supported_extensions": settings.excel.supported_extensions,
+                "max_rows_per_query": settings.excel.max_rows_per_query
+            },
+            "system": {
+                "log_level": settings.system.log_level,
+                "max_rows_default": settings.system.max_rows_default,
+                "cache_enabled": settings.system.cache_enabled,
+                "cache_ttl_minutes": settings.system.cache_ttl_minutes,
+                "debug_mode": settings.system.debug_mode
+            }
+        }
 
 # Instancia global del gestor
 system_info_manager = SystemInfoManager()
