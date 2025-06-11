@@ -1,4 +1,73 @@
+# =================================
+# SISTEMA EDUCATIVO MCP - DEPENDENCIAS
+# =================================
+
+# MCP SDK - Protocolo de Contexto del Modelo
 mcp==1.9.3
-pandas
-openpyxl
-xlrd
+
+# Procesamiento de datos
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Manejo de archivos Excel
+openpyxl>=3.1.0
+xlrd>=2.0.0
+xlsxwriter>=3.1.0
+
+# Variables de entorno (NUEVA - para seguridad)
+python-dotenv>=1.0.0
+
+# Conexión a Azure SQL Database (NUEVAS)
+pyodbc>=4.0.39
+sqlalchemy>=2.0.0
+pymssql>=2.2.0
+
+# Utilidades adicionales
+pathlib2>=2.3.0
+typing-extensions>=4.5.0
+
+# Validación de datos (NUEVA)
+pydantic>=2.0.0
+
+# Logging y debugging (NUEVAS)
+loguru>=0.7.0
+rich>=13.0.0
+
+# Análisis estadístico avanzado (NUEVAS)
+scipy>=1.10.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Fechas y tiempo
+python-dateutil>=2.8.0
+
+# =================================
+# DEPENDENCIAS OPCIONALES (para desarrollo)
+# =================================
+
+# Testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# Formateo de código
+black>=23.0.0
+isort>=5.12.0
+
+# Linting
+flake8>=6.0.0
+mypy>=1.5.0
+
+# =================================
+# NOTAS DE INSTALACIÓN:
+# 
+# Instalación básica:
+# pip install -r requirements.txt
+#
+# Para desarrollo completo:
+# pip install -r requirements.txt pytest black isort flake8
+#
+# Para conectividad Azure SQL en diferentes sistemas:
+# - Linux: sudo apt-get install unixodbc-dev
+# - Windows: Drivers incluidos normalmente
+# - macOS: brew install unixodbc
+# =================================

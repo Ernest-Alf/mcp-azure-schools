@@ -54,3 +54,32 @@ htmlcov/
 # Database
 *.db
 *.sqlite3
+
+# Variables de entorno (SENSIBLES - NO SUBIR)
+.env
+.env.local
+.env.production
+
+# Configuraciones locales de Claude Desktop
+claude_desktop_config.json
+**/claude_desktop_config.json
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Entorno virtual
+venv/
+.venv/
+
+# Logs
+*.log
+logs/
+
+# Archivos temporales
+check_install*.py
+temp_*
