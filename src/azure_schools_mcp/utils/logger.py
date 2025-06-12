@@ -1,51 +1,41 @@
 """
-Sistema de logging centralizado
+Sistema de logging simple y efectivo
+Sistema Educativo MCP
 """
 
 import logging
 import sys
 from pathlib import Path
-from typing import Optional
-from ..config.settings import settings
+from datetime import datetime
 
-def setup_logger(
-    name: str = "azure_schools_mcp",
-    log_file: Optional[str] = None,
-    level: Optional[str] = None
-) -> logging.Logger:
-    """Configura y retorna un logger"""
+class SimpleLogger:
+    """Logger simple para MCP"""
     
-    # Nivel de logging
-    log_level = level or settings.system.log_level
-    numeric_level = getattr(logging, log_level.upper(), logging.INFO)
-    
-    # Crear logger
-    logger = logging.getLogger(name)
-    logger.setLevel(numeric_level)
-    
-    # Evitar duplicar handlers
-    if logger.handlers:
+    @staticmethod
+    def setup(name: str = "mcp", level: str = "INFO") -> logging.Logger:
+        """Configura un logger simple"""
+        
+        logger = logging.getLogger(name)
+        logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+        
+        # Evitar duplicar handlers
+        if not logger.handlers:
+            handler = logging.StreamHandler(sys.stdout)
+            formatter = logging.Formatter(
+                '%(asctime)s | %(name)s | %(levelname)s | %(message)s'
+            )
+            handler.setFormatter(formatter)
+            logger.addHandler(handler)
+        
         return logger
     
-    # Formato de mensajes
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    )
-    
-    # Handler para consola
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(numeric_level)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-    
-    # Handler para archivo (opcional)
-    if log_file:
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setLevel(numeric_level)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-    
-    return logger
+    @staticmethod
+    def get_logger(module_name: str, level: str = "INFO") -> logging.Logger:
+        """Obtiene un logger para un módulo específico"""
+        return SimpleLogger.setup(f"mcp.{module_name}", level)
 
-# Logger principal del sistema
-main_logger = setup_logger()
+# Loggers principales del sistema
+main_logger = SimpleLogger.setup("mcp")
+excel_logger = SimpleLogger.setup("mcp.excel")
+database_logger = SimpleLogger.setup("mcp.database")
+server_logger = SimpleLogger.setup("mcp.server")

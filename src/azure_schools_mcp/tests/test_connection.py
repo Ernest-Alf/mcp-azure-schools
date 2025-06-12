@@ -1,67 +1,99 @@
 #!/usr/bin/env python3
 """
-Script para probar la conexión a Azure SQL Database
+Script mejorado para probar conexión a Azure SQL Database
+Usa el logger simplificado y configuración centralizada
 """
 
 import os
-import pyodbc
-from dotenv import load_dotenv
+import sys
+from pathlib import Path
 
-def test_connection():
-    """Prueba la conexión a Azure SQL Database"""
+# Añadir src al path
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root / "src"))
+
+from azure_schools_mcp.utils import main_logger
+from azure_schools_mcp.config.settings import settings
+
+def test_azure_sql_connection():
+    """Prueba la conexión a Azure SQL con logging mejorado"""
     
-    # Cargar variables de entorno
-    load_dotenv()
+    main_logger.info("🔧 Iniciando test de conexión a Azure SQL Database")
     
-    # Obtener configuración
-    server = os.getenv('AZURE_SQL_SERVER')
-    database = os.getenv('AZURE_SQL_DATABASE') 
-    username = os.getenv('AZURE_SQL_USERNAME')
-    password = os.getenv('AZURE_SQL_PASSWORD')
+    # Verificar configuración
+    if not settings.is_database_configured():
+        main_logger.error("❌ Base de datos no configurada")
+        main_logger.info("💡 Verificar variables en .env:")
+        main_logger.info("   - AZURE_SQL_SERVER")
+        main_logger.info("   - AZURE_SQL_DATABASE") 
+        main_logger.info("   - AZURE_SQL_USERNAME")
+        main_logger.info("   - AZURE_SQL_PASSWORD")
+        return False
     
-    print("🔧 Configuración:")
-    print(f"   Servidor: {server}")
-    print(f"   Base de datos: {database}")
-    print(f"   Usuario: {username}")
-    print(f"   Contraseña: {'*' * len(password) if password else 'No configurada'}")
-    print()
+    main_logger.info(f"📊 Configuración:")
+    main_logger.info(f"   Servidor: {settings.database.server}")
+    main_logger.info(f"   Base de datos: {settings.database.database}")
+    main_logger.info(f"   Usuario: {settings.database.username}")
+    main_logger.info(f"   Driver: {settings.database.driver}")
     
-    # Construir cadena de conexión
-    connection_string = (
-        f"DRIVER={{ODBC Driver 18 for SQL Server}};"
-        f"SERVER={server};"
-        f"DATABASE={database};"
-        f"UID={username};"
-        f"PWD={password};"
-        f"Encrypt=yes;"
-        f"TrustServerCertificate=no;"
-        f"Connection Timeout=30;"
-    )
-    
+    # Probar conexión usando el gestor centralizado
     try:
-        print("�� Intentando conectar...")
+        from azure_schools_mcp.config.database import db_manager
         
-        # Probar conexión
-        with pyodbc.connect(connection_string) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT 1 as test")
-            result = cursor.fetchone()
-            
-            print("✅ ¡Conexión exitosa!")
-            print(f"   Resultado de prueba: {result[0]}")
-            
-        return True
+        main_logger.info("🔗 Probando conexión...")
         
+        connection_ok = db_manager.test_connection()
+        
+        if connection_ok:
+            main_logger.info("✅ ¡Conexión exitosa!")
+            return True
+        else:
+            main_logger.error("❌ Error de conexión")
+            return False
+            
+    except ImportError as e:
+        main_logger.error(f"❌ Error importando database manager: {e}")
+        return False
     except Exception as e:
-        print("❌ Error de conexión:")
-        print(f"   {str(e)}")
+        main_logger.error(f"❌ Error de conexión: {e}")
+        return False
+
+def test_basic_query():
+    """Prueba una consulta básica"""
+    try:
+        from azure_schools_mcp.config.database import db_manager
+        
+        main_logger.info("📝 Probando consulta básica...")
+        
+        results = db_manager.execute_query("SELECT GETDATE() as current_time")
+        
+        if results:
+            main_logger.info(f"✅ Consulta exitosa: {results[0]}")
+            return True
+        else:
+            main_logger.warning("⚠️ Consulta sin resultados")
+            return False
+            
+    except Exception as e:
+        main_logger.error(f"❌ Error en consulta: {e}")
         return False
 
 if __name__ == "__main__":
-    print("�� Probando conexión a Azure SQL Database...\n")
-    success = test_connection()
+    main_logger.info("🧪 Test de conexión Azure SQL Database")
+    main_logger.info("=" * 40)
     
-    if success:
-        print("\n🎉 ¡Todo listo para continuar!")
+    # Test de conexión
+    connection_success = test_azure_sql_connection()
+    
+    if connection_success:
+        # Test de consulta básica
+        query_success = test_basic_query()
+        
+        if query_success:
+            main_logger.info("🎉 ¡Todos los tests exitosos!")
+        else:
+            main_logger.warning("⚠️ Conexión OK, pero error en consulta")
     else:
-        print("\n🔧 Revisa la configuración en el archivo .env")
+        main_logger.error("�� Revisar configuración de base de datos")
+    
+    main_logger.info("=" * 40)

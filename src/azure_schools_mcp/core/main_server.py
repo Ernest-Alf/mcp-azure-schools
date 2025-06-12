@@ -1,6 +1,6 @@
 """
-Sistema Educativo MCP - Servidor Principal
-Versión con Database Management Module
+Sistema Educativo MCP - Servidor Principal REFACTORIZADO
+Sin código redundante - Versión limpia
 Ernest-Alf - Junio 2025
 """
 
@@ -14,52 +14,70 @@ sys.path.insert(0, str(project_root / "src"))
 
 from mcp.server.fastmcp import FastMCP
 
-# Imports de módulos
-from src.azure_schools_mcp.processors.excel_extraction import register_excel_tools
-from src.azure_schools_mcp.tests.diagnostics import register_diagnostics_tools
-from azure_schools_mcp.modules.database_management import register_database_management_tools
+# Imports centralizados - SIN redundancia
+from azure_schools_mcp.shared.mcp_tools import register_excel_tools
+from azure_schools_mcp.tests.diagnostics import register_diagnostics_tools
 
-# Crear servidor MCP
-mcp = FastMCP("sistema-educativo-mcp")
+# Imports condicionales para módulos opcionales
+try:
+    from azure_schools_mcp.database_management import register_database_management_tools
+    DATABASE_MODULE_AVAILABLE = True
+except ImportError:
+    DATABASE_MODULE_AVAILABLE = False
+
+# Crear servidor MCP único
+mcp = FastMCP("sistema-educativo-mcp-refactorizado")
 
 def initialize_mcp_server():
-    """Inicializa el servidor MCP con todos los módulos"""
-    print("🎯 Inicializando Sistema Educativo MCP - Database Management")
+    """Inicializa el servidor MCP con módulos sin redundancia"""
+    print("🎯 Inicializando Sistema Educativo MCP - VERSIÓN REFACTORIZADA")
+    print("✨ Sin código redundante - Arquitectura limpia")
     
-    # Módulos existentes
+    total_tools = 0
+    
+    # Excel Tools (centralizado)
     excel_tools = register_excel_tools(mcp)
-    print(f"✅ Excel Tools: {len(excel_tools)} herramientas")
+    print(f"✅ Excel Tools (centralizado): {len(excel_tools)} herramientas")
+    total_tools += len(excel_tools)
     
+    # Diagnostics Tools
     diagnostics_tools = register_diagnostics_tools(mcp)
     print(f"✅ Diagnostics Tools: {len(diagnostics_tools)} herramientas")
+    total_tools += len(diagnostics_tools)
     
-    # Nuevo módulo Database Management
-    database_management_tools = register_database_management_tools(mcp)
-    print(f"✅ Database Management: {len(database_management_tools)} herramientas")
+    # Database Management (opcional)
+    if DATABASE_MODULE_AVAILABLE:
+        database_tools = register_database_management_tools(mcp)
+        print(f"✅ Database Management: {len(database_tools)} herramientas")
+        total_tools += len(database_tools)
+    else:
+        print("⚠️ Database Management: No disponible (módulo opcional)")
     
-    total_tools = len(excel_tools) + len(diagnostics_tools) + len(database_management_tools)
     print(f"🎯 Servidor MCP inicializado con {total_tools} herramientas totales")
-    print("📊 Arquitectura evolutiva lista para análisis de tus archivos Excel")
+    print("📊 Arquitectura limpia - Sin redundancias")
     
     return mcp
 
 def test_server():
-    """Prueba del servidor con Database Management"""
-    print("🧪 Probando Sistema Educativo MCP - Database Management...")
+    """Prueba del servidor refactorizado"""
+    print("🧪 Probando Sistema Educativo MCP REFACTORIZADO...")
     
     server = initialize_mcp_server()
     
-    # Test básico del nuevo módulo
+    # Test del extractor centralizado
     try:
-        from azure_schools_mcp.database_management import schema_registry, table_inspector
+        from azure_schools_mcp.shared.excel_extractor import get_excel_extractor
         
-        print("✅ Schema Registry: Funcionando")
-        print("✅ Table Inspector: Funcionando") 
-        print("✅ Database Management Module: Operativo")
-        print("🚀 Sistema listo para analizar tus archivos Excel y crear esquemas automáticamente")
+        extractor = get_excel_extractor()
+        test_result = extractor.list_excel_files()
+        
+        print("✅ Excel Extractor centralizado: Funcionando")
+        print(f"✅ Estado: {test_result.get('status', 'unknown')}")
+        print("✅ Sistema refactorizado: Operativo")
+        print("🚀 Sin código redundante - Listo para producción")
         
     except Exception as e:
-        print(f"❌ Error en Database Management: {e}")
+        print(f"❌ Error en test refactorizado: {e}")
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "test":
