@@ -9,13 +9,14 @@ from mcp.server.fastmcp import FastMCP
 from azure_schools_mcp.data_sources.excel.excel_extractor import ExcelExtractor
 from pathlib import Path
 from typing import Dict, Any, Optional, List
-
+from azure_schools_mcp.utils.json_helpers import safe_json_response
+import pandas as pd
 
 def register_excel_tools(mcp_server: FastMCP):
     """Registra herramientas Excel mejoradas en el servidor MCP"""
     
     # Inicializar extractor con directorio base
-    excel_dir = Path(__file__).parent.parent / "excel_files"
+    excel_dir = Path(__file__).parent.parent.parent.parent.parent / "excel_files"
     extractor = ExcelExtractor(excel_dir)
     
     @mcp_server.tool()
@@ -30,7 +31,7 @@ def register_excel_tools(mcp_server: FastMCP):
                 file_info = {
                     "name": file_path.name,
                     "size_mb": round(file_stat.st_size / (1024 * 1024), 2),
-                    "modified": file_stat.st_mtime
+                    "modified": int(file_stat.st_mtime)  # Convertir timestamp a entero
                 }
                 file_list.append(file_info)
             
@@ -54,27 +55,41 @@ def register_excel_tools(mcp_server: FastMCP):
         Args:
             filename: Nombre del archivo Excel
         """
-        result = extractor.extract_all_data(filename)
+
+        import json
         
-        # Convertir DataFrames a dict para serialización
-        if result.get("status") == "success" and "data" in result:
-            for sheet_name, sheet_data in result["data"].items():
-                if "dataframe" in sheet_data:
-                    df = sheet_data["dataframe"]
-                    sheet_data["dataframe"] = {
-                        "columns": list(df.columns),
-                        "rows": len(df),
-                        "sample": df.head(5).to_dict('records')
-                    }
-                if "cleaned" in sheet_data:
-                    cleaned_df = sheet_data["cleaned"]
-                    sheet_data["cleaned"] = {
-                        "columns": list(cleaned_df.columns),
-                        "rows": len(cleaned_df),
-                        "sample": cleaned_df.head(5).to_dict('records')
-                    }
-        
-        return json.dumps(result, indent=2, ensure_ascii=False, default=str)
+        try:
+            file_path = extractor.excel_dir / filename
+            
+            # Determinar engine basado en extensión
+            if filename.lower().endswith('.xls'):
+                engine = 'xlrd'
+            elif filename.lower().endswith('.xlsx'):
+                engine = 'openpyxl'
+            else:
+                engine = None
+            
+            # Leer todas las hojas
+            try:
+                if engine:
+                    all_sheets = pd.read_excel(file_path, sheet_name=None, engine=engine)
+                else:
+                    all_sheets = pd.read_excel(file_path, sheet_name=None)
+            except Exception as e:
+                return json.dumps({
+                    "status": "error",
+                    "error": f"Error leyendo archivo: {str(e)}"
+                })
+            
+            # Resto del código permanece igual...
+            result = extractor.extract_all_data(filename)
+            return json.dumps(result, indent=2, ensure_ascii=False)
+            
+        except Exception as e:
+            return json.dumps({
+                "status": "error", 
+                "error": str(e)
+            }, indent=2, ensure_ascii=False)
     
     @mcp_server.tool()
     def get_unique_values(filename: str, column: str, sheet_name: str = None) -> str:
@@ -102,7 +117,20 @@ def register_excel_tools(mcp_server: FastMCP):
                     "error": f"Hoja '{sheet_name}' no encontrada"
                 })
             
-            df = result["data"][sheet_name]["cleaned"]
+            # Obtener datos limpios y crear DataFrame
+            sheet_data = result["data"][sheet_name]["cleaned"]
+            
+            if isinstance(sheet_data, dict):
+                # Los datos están serializados como diccionario
+                if "sample" in sheet_data:
+                    # Usar muestra de datos
+                    df = pd.DataFrame(sheet_data["sample"])
+                else:
+                    # Recargar archivo completo
+                    df = pd.read_excel(extractor.excel_dir / filename, sheet_name=sheet_name)
+            else:
+                # sheet_data ya es un DataFrame
+                df = sheet_data
             
             if column not in df.columns:
                 return json.dumps({
@@ -111,16 +139,27 @@ def register_excel_tools(mcp_server: FastMCP):
                     "available_columns": list(df.columns)
                 })
             
-            unique_values = df[column].unique().tolist()
+            # Obtener valores únicos y convertir a tipos serializables
+            unique_values = df[column].dropna().unique()
+            unique_values_serializable = []
+            
+            for val in unique_values:
+                if pd.isna(val):
+                    continue
+                # Convertir tipos numpy/pandas a tipos Python nativos
+                if hasattr(val, 'item'):
+                    unique_values_serializable.append(val.item())
+                else:
+                    unique_values_serializable.append(val)
             
             response = {
                 "status": "success",
                 "filename": filename,
                 "sheet": sheet_name,
                 "column": column,
-                "unique_values": [str(val) for val in unique_values if val is not None],
-                "total_unique": len(unique_values),
-                "null_count": df[column].isnull().sum()
+                "unique_values": unique_values_serializable,
+                "total_unique": len(unique_values_serializable),
+                "null_count": int(df[column].isnull().sum())
             }
             
         except Exception as e:

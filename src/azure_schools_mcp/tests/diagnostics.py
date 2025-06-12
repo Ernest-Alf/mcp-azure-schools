@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 from typing import Dict, Any
 from mcp.server.fastmcp import FastMCP
+import pandas as pd
 
 # Usar utils simplificados
 from ..utils import main_logger, FileManager, validate_excel_file_basic
@@ -33,7 +34,7 @@ class SystemDiagnostics:
     
     def get_system_status(self) -> Dict[str, Any]:
         """Estado del sistema con logging"""
-        main_logger.info("📊 Obteniendo estado del sistema...")
+        main_logger.info("Obteniendo estado del sistema...")
         
         try:
             status = {
@@ -52,7 +53,7 @@ class SystemDiagnostics:
                 }
             }
             
-            main_logger.info("✅ Estado del sistema obtenido")
+            main_logger.info("Estado del sistema obtenido")
             return status
             
         except Exception as e:
@@ -106,10 +107,10 @@ class SystemDiagnostics:
             try:
                 module = __import__(module_name)
                 version = getattr(module, '__version__', 'unknown')
-                dependencies[description] = f"✅ v{version}"
+                dependencies[description] = f"v{version}"
                 main_logger.debug(f"Dependencia OK: {module_name} v{version}")
             except ImportError:
-                dependencies[description] = "❌ No disponible"
+                dependencies[description] = "No disponible"
                 main_logger.warning(f"Dependencia faltante: {module_name}")
         
         return dependencies
@@ -144,24 +145,24 @@ class SystemDiagnostics:
                     
                     db_status.update({
                         "connection_test": connection_ok,
-                        "status": "✅ Conectada" if connection_ok else "⚠️ Error de conexión"
+                        "status": "Conectada" if connection_ok else "⚠️ Error de conexión"
                     })
                     
                     if connection_ok:
-                        main_logger.info("✅ Conexión BD exitosa")
+                        main_logger.info("Conexión BD exitosa")
                     else:
-                        main_logger.warning("⚠️ Conexión BD falló")
+                        main_logger.warning("Conexión BD falló")
                         
                 except Exception as e:
                     db_status.update({
                         "connection_test": False,
                         "connection_error": str(e),
-                        "status": "❌ Error de conexión"
+                        "status": "Error de conexión"
                     })
                     main_logger.error(f"Error conectando BD: {e}")
             else:
                 db_status.update({
-                    "status": "❌ No configurada",
+                    "status": "No configurada",
                     "recommendation": "Configurar variables en .env"
                 })
                 main_logger.warning("Base de datos no configurada")
@@ -196,9 +197,9 @@ def register_diagnostics_tools(mcp_server: FastMCP):
     @mcp_server.tool()
     def excel_files_diagnostic() -> str:
         """Diagnóstico específico de archivos Excel"""
-        main_logger.info("📊 Ejecutando diagnóstico de archivos Excel")
+        main_logger.info("Ejecutando diagnóstico de archivos Excel")
         result = system_diagnostics._get_excel_status()
         return json.dumps(result, indent=2, ensure_ascii=False)
     
-    main_logger.info("✅ Herramientas de diagnóstico registradas")
+    main_logger.info("Herramientas de diagnóstico registradas")
     return [system_status, database_status, excel_files_diagnostic]

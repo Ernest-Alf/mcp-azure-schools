@@ -22,40 +22,40 @@ def test_azure_sql_connection():
     
     # Verificar configuración
     if not settings.is_database_configured():
-        main_logger.error("❌ Base de datos no configurada")
-        main_logger.info("💡 Verificar variables en .env:")
-        main_logger.info("   - AZURE_SQL_SERVER")
-        main_logger.info("   - AZURE_SQL_DATABASE") 
-        main_logger.info("   - AZURE_SQL_USERNAME")
-        main_logger.info("   - AZURE_SQL_PASSWORD")
+        main_logger.error("Base de datos no configurada")
+        main_logger.info("Verificar variables en .env:")
+        main_logger.info("- AZURE_SQL_SERVER")
+        main_logger.info("- AZURE_SQL_DATABASE") 
+        main_logger.info("- AZURE_SQL_USERNAME")
+        main_logger.info("- AZURE_SQL_PASSWORD")
         return False
     
-    main_logger.info(f"📊 Configuración:")
-    main_logger.info(f"   Servidor: {settings.database.server}")
-    main_logger.info(f"   Base de datos: {settings.database.database}")
-    main_logger.info(f"   Usuario: {settings.database.username}")
-    main_logger.info(f"   Driver: {settings.database.driver}")
+    main_logger.info(f"Configuración:")
+    main_logger.info(f"Servidor: {settings.database.server}")
+    main_logger.info(f"Base de datos: {settings.database.database}")
+    main_logger.info(f"Usuario: {settings.database.username}")
+    main_logger.info(f"Driver: {settings.database.driver}")
     
     # Probar conexión usando el gestor centralizado
     try:
         from azure_schools_mcp.config.database import db_manager
         
-        main_logger.info("🔗 Probando conexión...")
+        main_logger.info("Probando conexión...")
         
         connection_ok = db_manager.test_connection()
         
         if connection_ok:
-            main_logger.info("✅ ¡Conexión exitosa!")
+            main_logger.info("¡Conexión exitosa!")
             return True
         else:
-            main_logger.error("❌ Error de conexión")
+            main_logger.error("Error de conexión")
             return False
             
     except ImportError as e:
-        main_logger.error(f"❌ Error importando database manager: {e}")
+        main_logger.error(f"Error importando database manager: {e}")
         return False
     except Exception as e:
-        main_logger.error(f"❌ Error de conexión: {e}")
+        main_logger.error(f"Error de conexión: {e}")
         return False
 
 def test_basic_query():
@@ -63,23 +63,23 @@ def test_basic_query():
     try:
         from azure_schools_mcp.config.database import db_manager
         
-        main_logger.info("📝 Probando consulta básica...")
+        main_logger.info("Probando consulta básica...")
         
         results = db_manager.execute_query("SELECT GETDATE() as current_time")
         
         if results:
-            main_logger.info(f"✅ Consulta exitosa: {results[0]}")
+            main_logger.info(f"Consulta exitosa: {results[0]}")
             return True
         else:
-            main_logger.warning("⚠️ Consulta sin resultados")
+            main_logger.warning("Consulta sin resultados")
             return False
             
     except Exception as e:
-        main_logger.error(f"❌ Error en consulta: {e}")
+        main_logger.error(f"Error en consulta: {e}")
         return False
 
 if __name__ == "__main__":
-    main_logger.info("🧪 Test de conexión Azure SQL Database")
+    main_logger.info("Test de conexión Azure SQL Database")
     main_logger.info("=" * 40)
     
     # Test de conexión
@@ -90,10 +90,10 @@ if __name__ == "__main__":
         query_success = test_basic_query()
         
         if query_success:
-            main_logger.info("🎉 ¡Todos los tests exitosos!")
+            main_logger.info("¡Todos los tests exitosos!")
         else:
-            main_logger.warning("⚠️ Conexión OK, pero error en consulta")
+            main_logger.warning("Conexión OK, pero error en consulta")
     else:
-        main_logger.error("�� Revisar configuración de base de datos")
+        main_logger.error("Revisar configuración de base de datos")
     
     main_logger.info("=" * 40)
