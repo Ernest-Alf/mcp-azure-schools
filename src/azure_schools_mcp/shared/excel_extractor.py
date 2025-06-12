@@ -81,7 +81,7 @@ class ExcelExtractor:
             if header_row is None:
                 header_row = self._detect_header_row(file_path)
             
-            df = pd.read_excel(file_path, header=header_row, nrows=max_rows)
+            df = pd.read_excel(file_path, header=header_row, nrows=max_rows if max_rows is not None else None)
             df.columns = df.columns.astype(str).str.strip()
             
             # Convertir datos a tipos serializables
@@ -118,6 +118,91 @@ class ExcelExtractor:
             return 0
         except:
             return 0
+    
+    def analyze_excel_structure(self, filename: str = None) -> Dict[str, Any]:
+        """Analiza estructura completa de archivos Excel"""
+        try:
+            if filename:
+                return self._analyze_specific_file(filename)
+            else:
+                return self._analyze_loaded_files()
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+    
+    def _analyze_specific_file(self, filename: str) -> Dict[str, Any]:
+        """Analiza un archivo específico con detección inteligente de headers"""
+        file_path = self.excel_dir / filename
+        if not file_path.exists():
+            return {"status": "error", "error": f"Archivo {filename} no encontrado"}
+        
+        try:
+            excel_file = pd.ExcelFile(file_path)
+            
+            result = {
+                "status": "success",
+                "filename": filename,
+                "total_sheets": len(excel_file.sheet_names),
+                "sheets": {}
+            }
+            
+            for sheet_name in excel_file.sheet_names:
+                # Detectar header automáticamente para esta hoja
+                detected_header_row = self._detect_header_row_for_sheet(file_path, sheet_name)
+                
+                # Leer con header detectado
+                df = pd.read_excel(file_path, sheet_name=sheet_name, header=detected_header_row)
+                
+                # Información de la hoja
+                sheet_info = {
+                    "detected_header_row": detected_header_row + 1,  # Para mostrar fila real (1-based)
+                    "total_columns": len(df.columns),
+                    "columns": list(df.columns),
+                    "sample_data_rows": len(df),
+                    "column_analysis": {}
+                }
+                
+                # Análisis de cada columna
+                for col in df.columns:
+                    col_analysis = {
+                        "has_data": not df[col].isna().all(),
+                        "unique_values": int(df[col].nunique()) if not df[col].isna().all() else 0,
+                        "sample_values": [self._safe_serialize(val) for val in df[col].dropna().head(3).tolist()]
+                    }
+                    sheet_info["column_analysis"][col] = col_analysis
+                
+                result["sheets"][sheet_name] = sheet_info
+            
+            return result
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+
+    def _detect_header_row_for_sheet(self, file_path: Path, sheet_name: str, max_check: int = 5) -> int:
+        """Detecta header específicamente para una hoja"""
+        try:
+            for row in range(max_check):
+                df_test = pd.read_excel(file_path, sheet_name=sheet_name, header=row, nrows=3)
+                if len(df_test.columns) > 1:
+                    # Verificar que no sean muchas columnas "Unnamed"
+                    unnamed_count = sum(1 for col in df_test.columns if str(col).startswith('Unnamed'))
+                    if unnamed_count / len(df_test.columns) < 0.3:  # Menos del 30% unnamed
+                        return row
+            return 0
+        except:
+            return 0
+    
+    def _analyze_loaded_files(self) -> Dict[str, Any]:
+        """Analiza archivos cargados en memoria"""
+        if not self.loaded_files:
+            return {
+                "status": "no_data",
+                "message": "No hay archivos cargados en memoria"
+            }
+        
+        return {
+            "status": "success",
+            "loaded_files": len(self.loaded_files),
+            "files": list(self.loaded_files.keys())
+        }
 
 # Instancia global
 _excel_extractor_instance = None

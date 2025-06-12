@@ -6,6 +6,7 @@ Ernest-Alf - Junio 2025
 
 import sys
 from pathlib import Path
+from typing import Dict, Any, Optional, List
 
 # Configurar path para imports
 current_dir = Path(__file__).parent

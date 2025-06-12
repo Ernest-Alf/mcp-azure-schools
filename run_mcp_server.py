@@ -6,6 +6,7 @@ Ernest-Alf - Junio 2025
 
 import sys
 from pathlib import Path
+from typing import Dict, Any, Optional, List
 
 # Añadir src al path para imports
 project_root = Path(__file__).parent

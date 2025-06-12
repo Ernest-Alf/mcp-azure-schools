@@ -7,6 +7,8 @@ Ernest-Alf - Junio 2025
 import json
 from mcp.server.fastmcp import FastMCP
 from .excel_extractor import get_excel_extractor
+from typing import Dict, Any, Optional, List
+
 
 def register_excel_tools(mcp_server: FastMCP):
     """Registra herramientas Excel centralizadas en el servidor MCP"""
@@ -20,7 +22,7 @@ def register_excel_tools(mcp_server: FastMCP):
         return json.dumps(result, indent=2, ensure_ascii=False)
     
     @mcp_server.tool()
-    def extract_excel_data(filename: str, max_rows: int = 20, header_row: int = 0) -> str:
+    def extract_excel_data(filename: str, max_rows: int = None, header_row: int = None) -> Dict[str, Any]:
         """
         Extrae datos de un archivo Excel específico con detección automática
         

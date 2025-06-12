@@ -39,7 +39,7 @@ graph TB
 ### ✅ Implementado (v2.0)
 
 **Servidor MCP Completo**
-- 8 herramientas MCP funcionales y probadas
+- 6 herramientas MCP funcionales y probadas
 - Carga segura de variables de entorno (.env)
 - Gestión de DataFrames en memoria
 - Análisis automático de datos educativos
@@ -61,17 +61,17 @@ graph TB
 
 ## 🛠 Herramientas MCP Disponibles
 
-### 📊 Análisis de Archivos Excel
-1. **`debug_info()`** - Diagnóstico completo del sistema
-2. **`list_excel_files()`** - Lista archivos Excel disponibles
-3. **`read_excel_file()`** - Lee archivos Excel genéricos
-4. **`get_excel_info()`** - Información detallada de archivos
-5. **`excel_summary()`** - Resumen estadístico completo
+### 📊 Herramientas MCP Disponibles (6 tools)
 
-### 🎓 Análisis Educativo Específico
-6. **`read_schools_data()`** - Carga datos de centros educativos
-7. **`analyze_schools_by_municipality()`** - Análisis por municipio
-8. **`list_loaded_datasets()`** - Gestión de datasets en memoria
+**Excel Processing:**
+1. `list_excel_files()` - Lista archivos Excel
+2. `extract_excel_data()` - Extrae datos con detección automática de headers
+3. `analyze_excel_structure()` - Análisis completo de estructura
+
+**System Diagnostics:**
+4. `system_status()` - Estado del sistema
+5. `database_status()` - Estado Azure SQL
+6. `excel_files_diagnostic()` - Diagnóstico específico Excel
 
 ## 📊 Capacidades de Análisis
 
@@ -165,7 +165,7 @@ cp .env.example .env
       "args": [
         "-d", "Ubuntu",
         "/home/ernesto/proyectos/mcp-azure-schools/venv/bin/python",
-        "/home/ernesto/proyectos/mcp-azure-schools/src/azure_schools_mcp/server.py"
+        "/home/ernesto/proyectos/mcp-azure-schools/run_mcp_server.py"
       ]
     }
   }
@@ -180,10 +180,10 @@ Las herramientas MCP aparecerán en GitHub Copilot Chat automáticamente.
 
 ```bash
 # Modo test básico
-python src/azure_schools_mcp/server.py test
+python run_mcp_server.py test
 
 # Test desde Windows via WSL
-wsl -d Ubuntu /path/to/venv/bin/python /path/to/server.py test
+wsl -d Ubuntu /path/to/venv/bin/python /path/to/run_mcp_server.py test
 
 # Verificar dependencias
 python -c "from mcp.server.fastmcp import FastMCP; import pyodbc; print('✅ MCP y PyODBC OK')"
@@ -228,9 +228,18 @@ mcp-azure-schools/
 ├── excel_files/              # Archivos Excel para análisis
 │   └── [archivos_educativos].xlsx
 ├── src/
-│   └── azure_schools_mcp/    # Servidor MCP principal
-│       ├── __init__.py
-│       └── server.py         # 8 herramientas MCP
+├── azure_schools_mcp/
+│   ├── shared/                # 🆕 Código centralizado
+│   │   ├── excel_extractor.py # Extractor único
+│   │   └── mcp_tools.py       # Herramientas MCP
+│   ├── core/                  # 🆕 Servidor principal
+│   │   └── main_server.py
+│   ├── utils/                 # ✅ Simplificado
+│   │   ├── logger.py          # Logger básico
+│   │   ├── basic_validators.py # Validadores flexibles
+│   │   └── file_helpers.py    # Utilidades
+│   ├── tests/                 # ✅ Mejorado
+│   └── config/                # ✅ Configuración
 ├── scripts/                  # Scripts de utilidad
 ├── docs/                     # Documentación del proyecto
 ├── tests/                    # Tests automatizados
@@ -260,7 +269,7 @@ mcp-azure-schools/
 
 - **Tiempo de respuesta**: < 2 segundos por consulta MCP
 - **Archivos Excel procesados**: Soporte para múltiples archivos simultáneos
-- **Herramientas MCP activas**: 8/8 funcionando ✅
+- **Herramientas MCP activas**: 6/6 funcionando ✅
 - **Integración IA**: Claude Desktop ✅ + GitHub Copilot ✅
 - **Conectividad Azure SQL**: Establecida y operativa ✅
 
@@ -277,10 +286,10 @@ mcp-azure-schools/
 ### Servidor MCP no aparece en Claude Desktop
 ```bash
 # Probar servidor MCP desde WSL
-python src/azure_schools_mcp/server.py test
+python run_mcp_server.py test
 
 # Test desde Windows via WSL
-wsl -d Ubuntu /path/to/venv/bin/python /path/to/server.py test
+wsl -d Ubuntu /path/to/venv/bin/python /path/to/run_mcp_server.py test
 
 # Verificar configuración claude_desktop_config.json
 cat "%userprofile%\AppData\Roaming\Claude\claude_desktop_config.json"
